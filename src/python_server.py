@@ -295,19 +295,9 @@ async def handle_message(request: web.Request) -> web.StreamResponse:
                 error_data = json.dumps({"error": str(e)})
                 logger.debug(f"Sending error data: {error_data}")
                 await response.write(f"data: {error_data}\n\n".encode('utf-8'))
-
-            # Send done message
-            logger.debug("Sending done message")
-            done_data = json.dumps({"done": True})
-            await response.write(f"data: {done_data}\n\n".encode('utf-8'))
-            
-        except Exception as e:
-            logger.error(f"Error in stream_generate: {e}", exc_info=True)
-            error_data = json.dumps({"error": f"Stream generation error: {str(e)}"})
-            await response.write(f"data: {error_data}\n\n".encode('utf-8'))
-
-        await response.write_eof()
-        return response
+        finally:
+            await response.write_eof()
+            return response
         
     except Exception as e:
         logger.error(f"Error handling message: {e}", exc_info=True)

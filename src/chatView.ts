@@ -208,16 +208,24 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                                         data.replaceGenerating = true;
                                         isFirstChunk = false;
                                     }
-                                    if (data.choices && data.choices.length > 0 && data.choices[0].delta.content) {
-                                        console.log(`[${getVersionString()}] Sending response data to webview:`, data);
-                                        webviewView.webview.postMessage({
-                                            type: 'response',
-                                            content: {
-                                                text: data.choices[0].delta.content,
-                                                isUser: false
-                                            }
-                                        });
-                                    } else {
+                                    if (data.choices && data.choices.length > 0) {
+                                        const content = data.choices[0].delta.content;
+                                        if (content) {
+                                            console.log(`[${getVersionString()}] Sending response data to webview:`, data);
+                                            webviewView.webview.postMessage({
+                                                type: 'response',
+                                                content: {
+                                                    text: content,
+                                                    isUser: false
+                                                }
+                                            });
+                                        } else {
+                                            console.log(`[${getVersionString()}] Empty content, skipping`);
+                                        }
+                                    } else if (data.choices && data.choices[0].finish_reason === 'stop') {
+                                        console.log(`[${getVersionString()}] Received stop chunk, skipping`);
+                                    }
+                                    else {
                                         console.log(`[${getVersionString()}] Empty or invalid choices array, skipping`);
                                     }
                                 } catch (e) {
