@@ -1,0 +1,10 @@
+aiohttp==3.9.1
+pydantic==2.5.2
+pydantic-settings==2.1.0
+python-dotenv==1.0.0
+asyncio==3.4.3
+async-timeout==4.0.3
+instructor==0.4.6
+openai==1.6.1
+rich>=13.7.0
+prompt_toolkit>=3.0.43

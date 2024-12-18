@@ -1,0 +1,98 @@
+{
+  "name": "pydantic-agent-vscode",
+  "displayName": "Pydantic Agent Framework",
+  "description": "VS Code extension for Pydantic agent framework integration",
+  "version": "1.0.0",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onView:pydanticAgent.chatView",
+    "onCommand:pydantic-agent.startChat",
+    "onCommand:pydantic-agent.showOutput"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "Pydantic Agent",
+      "properties": {
+        "pydanticAgent.llm.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API key for the LLM service"
+        },
+        "pydanticAgent.llm.baseUrl": {
+          "type": "string",
+          "default": "https://glhf.chat/api/openai/v1",
+          "description": "Base URL for the LLM service"
+        },
+        "pydanticAgent.llm.model": {
+          "type": "string",
+          "default": "hf:Qwen/QwQ-32B-Preview",
+          "description": "Model to use for the LLM service"
+        },
+        "pydanticAgent.llm.temperature": {
+          "type": "number",
+          "default": 0.7,
+          "description": "Temperature for LLM responses"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "pydantic-agent.startChat",
+        "title": "Open Pydantic Agent Chat",
+        "category": "Pydantic Agent"
+      },
+      {
+        "command": "pydantic-agent.showOutput",
+        "title": "Show Output Log",
+        "category": "Pydantic Agent"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "pydantic-agent-sidebar",
+          "title": "Pydantic Agent",
+          "icon": "$(comment-discussion)"
+        }
+      ]
+    },
+    "views": {
+      "pydantic-agent-sidebar": [
+        {
+          "type": "webview",
+          "id": "pydanticAgent.chatView",
+          "name": "Agent Chat",
+          "icon": "$(comment-discussion)",
+          "contextualTitle": "Pydantic Agent Chat"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "20.2.5",
+    "@types/vscode": "^1.74.0",
+    "@typescript-eslint/eslint-plugin": "^5.59.8",
+    "@typescript-eslint/parser": "^5.59.8",
+    "@vscode/test-electron": "^2.3.2",
+    "eslint": "^8.41.0",
+    "glob": "^8.1.0",
+    "mocha": "^10.2.0",
+    "typescript": "^5.1.3"
+  }
+}

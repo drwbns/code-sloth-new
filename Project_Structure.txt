@@ -1,0 +1,132 @@
+Pydantic Agent - VS Code Extension
+===============================
+
+Project Overview
+---------------
+A VS Code extension that provides an AI-powered coding assistant using a Pydantic-based chat interface. The extension communicates with a Python server that handles LLM (Language Model) interactions.
+
+Key Components
+-------------
+1. VS Code Extension (TypeScript)
+   - Provides chat interface in VS Code
+   - Handles communication with Python server
+   - Manages WebView for chat UI
+
+2. Python Server
+   - Handles LLM API communication
+   - Processes chat messages
+   - Manages streaming responses
+   - Location: src/python_server.py
+
+3. Pydantic Agent Package
+   - Base agent functionality
+   - LLM integration
+   - Configuration management
+   - Location: pydantic_agent/
+
+Component Details
+----------------
+1. LLM Integration (pydantic_agent/llm_integration.py)
+   - Handles communication with OpenAI-compatible API
+   - Uses Qwen/Qwen2.5-Coder-32B-Instruct model for code-specific tasks
+   - Manages streaming responses with buffering
+   - Uses aiohttp for async HTTP requests
+   - Implements SSE (Server-Sent Events) parsing with error handling
+   - Timeout handling: 30 seconds per request
+   - Smart chunking of responses based on natural breaks
+   - Proper Bearer token authentication
+   - Automatic retry logic for handling temporary service disruptions
+
+2. Agent Implementation (pydantic_agent/llm_agent.py)
+   - Implements base agent functionality
+   - Handles message generation
+   - Manages agent context and state
+   - Provides stream_generate and analyze capabilities
+   - Position-aware streaming updates
+   - Proper error propagation
+
+3. Configuration (pydantic_agent/config.py)
+   - Manages environment variables
+   - Handles LLM settings
+   - Uses pydantic_settings for validation
+
+Dependencies
+-----------
+Python Packages (requirements.txt):
+- aiohttp==3.9.1: Async HTTP client/server
+- pydantic==2.5.2: Data validation
+- pydantic-settings==2.1.0: Settings management
+- python-dotenv==1.0.0: Environment variable loading
+- asyncio==3.4.3: Async I/O support
+- async-timeout==4.0.3: Timeout handling
+- instructor==0.4.6: LLM response handling
+- rich>=13.7.0: Console output formatting
+- prompt_toolkit>=3.0.43: CLI interface
+
+Environment Variables (.env)
+--------------------------
+Required variables:
+- LLM_API_KEY: API key for LLM service
+- LLM_BASE_URL: Base URL for OpenAI-compatible API
+- LLM_MODEL: Model name to use
+- LLM_TEMPERATURE: Temperature setting (0.0-1.0)
+
+Communication Flow
+----------------
+1. User Input -> VS Code Extension
+2. Extension -> Python Server (WebSocket)
+3. Server -> LLM API (HTTP/SSE)
+4. LLM API -> Server (Streaming)
+5. Server -> Extension (SSE)
+6. Extension -> Chat UI (WebView)
+
+Implementation Notes
+------------------
+1. Server Communication
+   - Uses aiohttp for async server
+   - Dynamic port allocation
+   - Port number shared via temp file
+   - SSE format for streaming
+
+2. Error Handling
+   - Comprehensive error logging
+   - Timeout handling (30s)
+   - Stream parsing validation
+   - Resource cleanup
+
+3. Response Format
+   - Uses Pydantic models for validation
+   - Structured message format
+   - Type-safe responses
+   - Buffered streaming for better UX
+   - Natural text chunking
+   - Position tracking for insertions
+
+4. Settings Management
+   - Settings can be configured in two locations:
+     a. VS Code User Settings (C:/Users/Admin/AppData/Roaming/Windsurf/User/settings.json)
+     b. Workspace Settings (.vscode/settings.json)
+   - Settings are passed from extension to Python server via VSCODE_SETTINGS environment variable
+   - Python server parses settings JSON and uses them with fallback to .env values
+   - Available settings under "pydanticAgent.llm":
+     - apiKey: API key for LLM service
+     - baseUrl: Base URL for OpenAI-compatible API
+     - model: Model name to use
+     - temperature: Temperature setting (0.0-1.0)
+
+5. Security
+   - Environment-based configuration
+   - No hardcoded credentials
+   - Secure API key handling
+
+Usage
+-----
+1. Install Python dependencies:
+   pip install -r requirements.txt
+
+2. Configure .env file with LLM settings
+
+3. Start VS Code extension:
+   - Open command palette
+   - Search for "Pydantic Agent"
+   - Select "Start Chat"

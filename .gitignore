@@ -1,0 +1,13 @@
+node_modules/*
+*.pyc
+
+# windsurf rules
+.windsurfrules
+.history/*
+pydantic_agent_debug.log
+*.log
+pydantic_agent.egg-info/*
+*.env
+cline_docs/*
+out/*
+.vscode/*
