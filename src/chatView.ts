@@ -208,7 +208,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                                         data.replaceGenerating = true;
                                         isFirstChunk = false;
                                     }
-                                    if (data.choices && data.choices.length > 0) {
+                                    if (data.choices && data.choices.length > 0 && data.choices[0].delta.content) {
                                         console.log(`[${getVersionString()}] Sending response data to webview:`, data);
                                         webviewView.webview.postMessage({
                                             type: 'response',
@@ -218,7 +218,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                                             }
                                         });
                                     } else {
-                                        console.log(`[${getVersionString()}] Empty choices array, skipping`);
+                                        console.log(`[${getVersionString()}] Empty or invalid choices array, skipping`);
                                     }
                                 } catch (e) {
                                     console.error(`[${getVersionString()}] Error parsing SSE data:`, e);
