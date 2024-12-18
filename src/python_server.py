@@ -270,7 +270,6 @@ async def handle_message(request: web.Request) -> web.StreamResponse:
             start_data = json.dumps({"startNewMessage": True})
             await response.write(f"data: {start_data}\n\n".encode('utf-8'))
 
-            # Stream the response chunks
             try:
                 logger.debug("Starting to stream response chunks")
                 for chunk in completion:
@@ -279,10 +278,18 @@ async def handle_message(request: web.Request) -> web.StreamResponse:
                         text = chunk.choices[0].delta.content
                         logger.debug(f"Received chunk: {text}")
                         # Send the chunk in SSE format
-                        response_data = json.dumps({"text": text})
+                        response_data = json.dumps({
+                            "type": "chunk",
+                            "content": text
+                        })
                         logger.debug(f"Sending response data: {response_data}")
                         await response.write(f"data: {response_data}\n\n".encode('utf-8'))
                         logger.debug("Response written")
+
+                # Send done message
+                logger.debug("Sending done message")
+                done_data = json.dumps({"type": "done"})
+                await response.write(f"data: {done_data}\n\n".encode('utf-8'))
             except Exception as e:
                 logger.error(f"Error processing stream: {str(e)}", exc_info=True)
                 error_data = json.dumps({"error": str(e)})
