@@ -8,3 +8,4 @@ instructor==0.4.6
 openai==1.6.1
 rich>=13.7.0
 prompt_toolkit>=3.0.43
+pydantic_agent
