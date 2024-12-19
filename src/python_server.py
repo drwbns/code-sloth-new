@@ -267,14 +267,21 @@ async def handle_message(request: web.Request) -> web.StreamResponse:
             )
             
             # Send start message
-            start_data = json.dumps({"startNewMessage": True})
-            await response.write(f"data: {start_data}\n\n".encode('utf-8'))
+            #start_data = json.dumps({"startNewMessage": True})
+            #await response.write(f"data: {start_data}\n\n".encode('utf-8'))
 
             try:
                 logger.debug("Starting to stream response chunks")
                 for chunk in completion:
                     logger.debug(f"Raw chunk: {chunk}")
-                    if hasattr(chunk, 'choices') and chunk.choices and chunk.choices[0].delta and hasattr(chunk.choices[0].delta, 'content') and chunk.choices[0].delta.content:
+                    if (hasattr(chunk, 'choices') and 
+                        chunk.choices and 
+                        chunk.choices[0].delta and 
+                        hasattr(chunk.choices[0].delta, 'content') and 
+                        chunk.choices[0].delta.content is not None and  # Explicit None check
+                        chunk.choices[0].delta.content is not '' and  # Explicit None check
+                        chunk.choices[0].delta.content.strip()):  # Check for non-empty content
+                        
                         text = chunk.choices[0].delta.content
                         logger.debug(f"Received chunk: {text}")
                         # Send the chunk in SSE format
@@ -287,9 +294,9 @@ async def handle_message(request: web.Request) -> web.StreamResponse:
                         logger.debug("Response written")
 
                 # Send done message
-                logger.debug("Sending done message")
-                done_data = json.dumps({"type": "done"})
-                await response.write(f"data: {done_data}\n\n".encode('utf-8'))
+                #logger.debug("Sending done message")
+                #done_data = json.dumps({"type": "done"})
+                #await response.write(f"data: {done_data}\n\n".encode('utf-8'))
             except Exception as e:
                 logger.error(f"Error processing stream: {str(e)}", exc_info=True)
                 error_data = json.dumps({"error": str(e)})
