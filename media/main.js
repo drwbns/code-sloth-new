@@ -8,15 +8,6 @@ const sendButton = document.getElementById('send-button');
 
 console.log('Chat view initialized');
 
-function displayMessage(text, isUser) {
-    console.log('Displaying message:', { text, isUser });
-    const messageDiv = document.createElement('div');
-    messageDiv.className = isUser ? 'user-message' : 'assistant-message';
-    messageDiv.textContent = text || '';
-    chatMessages.appendChild(messageDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
 function displayGeneratingMessage() {
     console.log('Displaying generating message');
     const generatingDiv = document.createElement('div');
@@ -49,49 +40,58 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM loaded, sending ready message');
     vscode.postMessage({ type: 'ready' });
 });
+let currentMessageDiv = null;
+let messageBuffer = '';
 
-// Handle messages from the extension
+function displayMessage(text, isUser) {
+    console.log('Displaying message:', { text, isUser });
+    
+    // Always create new div for each message
+    currentMessageDiv = document.createElement('div');
+    if (isUser) {
+        currentMessageDiv.className = 'user-message';
+    } else {
+        currentMessageDiv.className = 'assistant-message';
+    }
+    currentMessageDiv.textContent = text;
+    chatMessages.appendChild(currentMessageDiv);
+    
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// Update the message event handler
 window.addEventListener('message', event => {
     const message = event.data;
     console.log('Received message from extension:', message);
 
-    if (message.type === 'init') {
-        console.log('Received init message, sending ready');
-        vscode.postMessage({ type: 'ready' });
-        return;
-    }
-
     if (message.type === 'response') {
         const content = message.content;
-        console.log('Processing response content:', content);
         
         if (content.error) {
-            console.error('Displaying error:', content.error);
             displayErrorMessage(content.error);
             return;
         }
 
-        if (content.isGenerating) {
-            console.log('Displaying generating message');
-            displayGeneratingMessage();
-            return;
-        }
-
-        if (content.done) {
-            console.log('Removing generating message');
+        if (content.type === 'start') {
+            console.log('Start new message');
             removeGeneratingMessage();
+            currentMessageDiv = null; // Clear current message div
             return;
         }
 
-        if (content.text !== undefined) {
-            console.log('Displaying message:', content.text);
+        if (content.type === 'done') {
+            console.log('Message completed');
+            currentMessageDiv = null;
+            return;
+        }
+
+        if (content.text !== undefined && content.text !== "") {
             if (content.replaceGenerating) {
-                console.log('Replacing generating message');
                 removeGeneratingMessage();
             }
             displayMessage(content.text, content.isUser);
         } else {
-            console.warn('Received response with no text:', content);
+            console.log('Skipping message with undefined or empty text:', content);
         }
     }
 });

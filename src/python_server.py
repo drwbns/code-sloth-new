@@ -266,9 +266,7 @@ async def handle_message(request: web.Request) -> web.StreamResponse:
                 temperature=agent.llm_config.temperature
             )
             
-            # Send start message
-            #start_data = json.dumps({"startNewMessage": True})
-            #await response.write(f"data: {start_data}\n\n".encode('utf-8'))
+            await response.write(f"data: {json.dumps({'startNewMessage': True})}\n\n".encode('utf-8'))
 
             try:
                 logger.debug("Starting to stream response chunks")
@@ -279,8 +277,7 @@ async def handle_message(request: web.Request) -> web.StreamResponse:
                         chunk.choices[0].delta and 
                         hasattr(chunk.choices[0].delta, 'content') and 
                         chunk.choices[0].delta.content is not None and  # Explicit None check
-                        chunk.choices[0].delta.content is not '' and  # Explicit None check
-                        chunk.choices[0].delta.content.strip()):  # Check for non-empty content
+                        chunk.choices[0].delta.content.strip() != ''):  # Check for non-empty content
                         
                         text = chunk.choices[0].delta.content
                         logger.debug(f"Received chunk: {text}")
@@ -293,10 +290,7 @@ async def handle_message(request: web.Request) -> web.StreamResponse:
                         await response.write(f"data: {response_data}\n\n".encode('utf-8'))
                         logger.debug("Response written")
 
-                # Send done message
-                #logger.debug("Sending done message")
-                #done_data = json.dumps({"type": "done"})
-                #await response.write(f"data: {done_data}\n\n".encode('utf-8'))
+                await response.write(f"data: {json.dumps({'done': True})}\n\n".encode('utf-8'))
             except Exception as e:
                 logger.error(f"Error processing stream: {str(e)}", exc_info=True)
                 error_data = json.dumps({"error": str(e)})
